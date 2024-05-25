@@ -3,6 +3,7 @@ import telebot
 import configparser
 import tensorflow
 from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Configs
 config = configparser.ConfigParser()
@@ -22,13 +23,11 @@ loaded_model = load_model('./resources/model.h5')
 
 def predict_toxicity(text: str) -> str:
     text_seq = tokenizer.texts_to_sequences([text])
-    text_pad = tensorflow.keras.preprocessing.sequence.pad_sequences(text_seq, maxlen=200)
+    text_pad = pad_sequences(text_seq, maxlen=200)
 
     prediction = loaded_model.predict(text_pad)
     toxicity_probability = prediction[0][0]
-    return f"Текст токсичен с вероятностью: {toxicity_probability * 100:.2f}%" \
-        if toxicity_probability > 0.5 \
-        else f"Текст не токсичен с вероятностью: {(1 - toxicity_probability) * 100:.2f}%"
+    return f"Степень токсичности текста: {toxicity_probability * 100:.2f}%"
 
 
 @bot.message_handler(commands=['start'])
